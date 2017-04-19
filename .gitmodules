@@ -1,0 +1,12 @@
+[submodule "go-vncdriver"]
+	path = go-vncdriver
+	url = git@github.com:openai/go-vncdriver.git
+[submodule "catkin/src/ArdroneRL"]
+	path = catkin/src/ArdroneRL
+	url = git@github.gatech.edu:ebrooks34/ArdroneRL.git
+[submodule "catkin/src/a3c"]
+	path = catkin/src/a3c
+	url = git@github.gatech.edu:ebrooks34/a3c.git
+[submodule "catkin/src/--force"]
+	path = catkin/src/--force
+	url = git@github.gatech.edu:ebrooks34/ArdroneRL.git
