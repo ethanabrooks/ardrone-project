@@ -60,14 +60,8 @@ RUN cd catkin && . /opt/ros/kinetic/setup.bash && catkin_make
 COPY catkin/src/a3c catkin/src/a3c
 RUN cd catkin && . /opt/ros/kinetic/setup.bash && catkin_make
 
-# agent
-#RUN pip install -e catkin/src/agent
-RUN echo ". /opt/ros/kinetic/setup.bash" >> /root/.bashrc
-RUN echo ". /catkin/devel/setup.bash" >> /root/.bashrc
-#RUN echo "f () { roslaunch ardrone_controller train.launch agent:=a3c \
-      #gui:=false args:='--log-dir /tmp/ --env-id gazebo --num-workers $num_workers \
-      #--job-name worker --task $i --remotes $remotes' }" >> /root/.bashrc
-
+RUN mkdir -p /tmp/ardrone/
+COPY ./catkin/src/a3c/xvfb-launch.sh catkin/src/a3c/xvfb-launch.sh
 
 # TensorBoard
 EXPOSE 6006
@@ -77,11 +71,20 @@ ENV DISPLAY :0
 
 WORKDIR /root
 
+# agent
+#RUN pip install -e catkin/src/agent
+#RUN echo ". /opt/ros/kinetic/setup.bash" >> /root/.bashrc
+#RUN echo ". /catkin/devel/setup.bash" >> /root/.bashrc
+#RUN echo "f () { roslaunch ardrone_controller train.launch agent:=a3c \
+      #gui:=false args:='--log-dir /tmp/ --env-id gazebo --num-workers $num_workers \
+      #--job-name worker --task $i --remotes $remotes' }" >> /root/.bashrc
+
+
 # See http://answers.gazebosim.org/question/8065/unable-to-create-depthcamerasensor-when-launching-in-remote-computer/
-RUN echo "Xvfb -shmem -screen 0 1280x1024x24 &" >> /root/.bashrc
+#RUN echo "Xvfb -shmem -screen 0 1280x1024x24 &" >> /root/.bashrc
 #RUN echo 'function f { roslaunch a3c train.launch gui:=false \
      #num_workers:=$num_workers i:=$i remotes:=$remotes ; }' >> /root/.bashrc
-RUN echo 'roslaunch a3c train.launch gui:=false \
-     num_workers:=$num_workers i:=$i remotes:=$remotes' >> /root/.bashrc
-CMD ["/bin/bash"]
+#RUN echo 'roslaunch a3c train.launch gui:=false \
+     #num_workers:=$num_workers i:=$i remotes:=$remotes' >> /root/.bashrc
+#CMD ["/bin/bash"]
 
