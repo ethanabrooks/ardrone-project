@@ -49,13 +49,13 @@ COPY go-vncdriver go-vncdriver
 RUN apt-get install -y python-dev make golang libjpeg-turbo8-dev
 RUN pip install go-vncdriver
 
-RUN pip --no-cache-dir install tensorflow gym[atari] opencv-python universe scipy
+RUN pip --no-cache-dir install tensorflow 'gym[atari]==0.7.4' opencv-python universe scipy
 
 # Install SSH server
 RUN apt-get update && apt-get install -y openssh-server
 RUN mkdir /var/run/sshd
 RUN echo 'root:nothing' | chpasswd
-RUN sed -i 's/PermitRootLogin without-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN sed -i 's/PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config
 RUN echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
 RUN sed -i 's/Port 22/Port 22123/' /etc/ssh/sshd_config
 
@@ -64,6 +64,7 @@ RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so
 
 ENV NOTVISIBLE "in users profile"
 RUN echo "export VISIBLE=now" >> /etc/profile
+
 
 # catkin
 COPY catkin/src/ArdroneRL catkin/src/ArdroneRL
@@ -83,7 +84,12 @@ EXPOSE 6006
 # xvfb
 ENV DISPLAY :0
 
-WORKDIR /root
+EXPOSE 22
+
+ADD ./cartpole /home/ethan/ardrone-project/cartpole
+RUN echo "f () { CUDA_VISIBLE_DEVICES= /usr/bin/python worker.py --log-dir /home/ethan/ardrone-project/cartpole --env-id CartPole-v0 --num-workers 4 --job-name worker; }" >> /root/.bashrc
+#RUN echo "f () { CUDA_VISIBLE_DEVICES= /usr/bin/python worker.py --log-dir /tmp/cartpole --env-id CartPole-v0 --num-workers 4 --job-name worker; }" >> /root/.bashrc
+WORKDIR /catkin/src/a3c
 
 # agent
 #RUN pip install -e catkin/src/agent
