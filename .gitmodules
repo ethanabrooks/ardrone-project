@@ -4,3 +4,6 @@
 [submodule "catkin/src/ArdroneRL"]
 	path = catkin/src/ArdroneRL
 	url = git@github.gatech.edu:ebrooks34/ArdroneRL.git
+[submodule "catkin/src/universe-starter-agent"]
+	path = catkin/src/universe-starter-agent
+	url = git@github.com:lobachevzky/universe-starter-agent.git
