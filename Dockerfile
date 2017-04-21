@@ -84,7 +84,7 @@ ENV DISPLAY :0
 EXPOSE 22
 
 RUN echo "f () { CUDA_VISIBLE_DEVICES= /usr/bin/python worker.py --log-dir cartpole --env-id CartPole-v0 --num-workers 4 --job-name worker; }" >> /root/.bashrc
-WORKDIR /catkin/src/a3c
+#WORKDIR /catkin/src/a3c
 
 # agent
 #RUN pip install -e catkin/src/agent
