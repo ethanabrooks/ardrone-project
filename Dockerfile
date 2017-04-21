@@ -75,8 +75,8 @@ RUN cd catkin && . /opt/ros/kinetic/setup.bash && catkin_make
 COPY catkin/src/a3c catkin/src/a3c
 RUN cd catkin && . /opt/ros/kinetic/setup.bash && catkin_make
 
-RUN mkdir -p /tmp/ardrone/
-COPY ./catkin/src/a3c/xvfb-launch.sh catkin/src/a3c/xvfb-launch.sh
+#RUN mkdir -p /tmp/ardrone/
+#COPY ./catkin/src/a3c/xvfb-launch.sh catkin/src/a3c/xvfb-launch.sh
 
 # TensorBoard
 EXPOSE 6006
@@ -86,8 +86,8 @@ ENV DISPLAY :0
 
 EXPOSE 22
 
-ADD ./cartpole /home/ethan/ardrone-project/cartpole
-RUN echo "f () { CUDA_VISIBLE_DEVICES= /usr/bin/python worker.py --log-dir /home/ethan/ardrone-project/cartpole --env-id CartPole-v0 --num-workers 4 --job-name worker; }" >> /root/.bashrc
+#ADD ./cartpole /home/ethan/ardrone-project/catkin/src/a3c/cartpole
+RUN echo "f () { CUDA_VISIBLE_DEVICES= /usr/bin/python worker.py --log-dir cartpole --env-id CartPole-v0 --num-workers 4 --job-name worker; }" >> /root/.bashrc
 #RUN echo "f () { CUDA_VISIBLE_DEVICES= /usr/bin/python worker.py --log-dir /tmp/cartpole --env-id CartPole-v0 --num-workers 4 --job-name worker; }" >> /root/.bashrc
 WORKDIR /catkin/src/a3c
 
