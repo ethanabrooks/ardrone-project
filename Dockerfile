@@ -80,12 +80,14 @@ RUN echo 'f () { roslaunch a3c train.launch gui:=false \
 
 RUN echo ". /opt/ros/kinetic/setup.bash" >> /root/.bashrc
 RUN echo ". /catkin/devel/setup.bash" >> /root/.bashrc
-RUN cp /bin/bash /bin/sh 
 
-# ArdroneRL
-COPY catkin/src/ArdroneRL catkin/src/ArdroneRL
+RUN cp /bin/bash /bin/sh 
+RUN mkdir -p catkin/src
 RUN cd catkin/src && . /opt/ros/kinetic/setup.bash && catkin_init_workspace
-RUN cd catkin && . /opt/ros/kinetic/setup.bash && catkin_make
+
+# tum_simulator
+COPY catkin/src/tum_simulator/ catkin/src/tum_simulator
+RUN . /opt/ros/kinetic/setup.bash && cd catkin && catkin_make
 
 # A3C
 COPY catkin/src/a3c catkin/src/a3c
