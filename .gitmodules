@@ -7,3 +7,6 @@
 [submodule "catkin/src/universe-starter-agent"]
 	path = catkin/src/a3c
 	url = git@github.com:lobachevzky/universe-starter-agent.git
+[submodule "catkin/src/tum_simulator"]
+	path = catkin/src/tum_simulator
+	url = git@github.com:lobachevzky/tum_simulator.git

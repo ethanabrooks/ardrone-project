@@ -65,40 +65,42 @@ RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so
 ENV NOTVISIBLE "in users profile"
 RUN echo "export VISIBLE=now" >> /etc/profile
 
-
-# catkin
-COPY catkin/src/ArdroneRL catkin/src/ArdroneRL
-RUN cp /bin/bash /bin/sh
-RUN cd catkin/src && . /opt/ros/kinetic/setup.bash && catkin_init_workspace
-RUN cd catkin && . /opt/ros/kinetic/setup.bash && catkin_make
-
-COPY catkin/src/a3c catkin/src/a3c
-RUN cd catkin && . /opt/ros/kinetic/setup.bash && catkin_make
-
 # TensorBoard
 EXPOSE 6006
 
 # xvfb
-ENV DISPLAY :0
+ENV DISPLAY :1.0
 
 EXPOSE 22
 
-RUN echo "f () { CUDA_VISIBLE_DEVICES= /usr/bin/python worker.py --log-dir cartpole --env-id CartPole-v0 --num-workers 4 --job-name worker; }" >> /root/.bashrc
+#RUN echo "f () { CUDA_VISIBLE_DEVICES= /usr/bin/python worker.py --log-dir cartpole --env-id CartPole-v0 --num-workers 4 --job-name worker; }" >> /root/.bashrc
+
+RUN echo 'f () { roslaunch a3c train.launch gui:=false \
+     num_workers:=$num_workers i:=$i remotes:=$remotes ; }' >> /root/.bashrc
+
+RUN echo ". /opt/ros/kinetic/setup.bash" >> /root/.bashrc
+RUN echo ". /catkin/devel/setup.bash" >> /root/.bashrc
+RUN cp /bin/bash /bin/sh 
+
+# ArdroneRL
+COPY catkin/src/ArdroneRL catkin/src/ArdroneRL
+RUN cd catkin/src && . /opt/ros/kinetic/setup.bash && catkin_init_workspace
+RUN cd catkin && . /opt/ros/kinetic/setup.bash && catkin_make
+
+# A3C
+COPY catkin/src/a3c catkin/src/a3c
+RUN cd catkin && . /opt/ros/kinetic/setup.bash && catkin_make
+COPY catkin/src/a3c/xvfb-launch.sh /
+
 #WORKDIR /catkin/src/a3c
 
 # agent
 #RUN pip install -e catkin/src/agent
-#RUN echo ". /opt/ros/kinetic/setup.bash" >> /root/.bashrc
-#RUN echo ". /catkin/devel/setup.bash" >> /root/.bashrc
-#RUN echo "f () { roslaunch ardrone_controller train.launch agent:=a3c \
-      #gui:=false args:='--log-dir /tmp/ --env-id gazebo --num-workers $num_workers \
-      #--job-name worker --task $i --remotes $remotes' }" >> /root/.bashrc
+#RUN echo "f () { roslaunch a3c train.launch }" >> /root/.bashrc
 
 
 # See http://answers.gazebosim.org/question/8065/unable-to-create-depthcamerasensor-when-launching-in-remote-computer/
 #RUN echo "Xvfb -shmem -screen 0 1280x1024x24 &" >> /root/.bashrc
-#RUN echo 'function f { roslaunch a3c train.launch gui:=false \
-     #num_workers:=$num_workers i:=$i remotes:=$remotes ; }' >> /root/.bashrc
 #RUN echo 'roslaunch a3c train.launch gui:=false \
      #num_workers:=$num_workers i:=$i remotes:=$remotes' >> /root/.bashrc
 #CMD ["/bin/bash"]
