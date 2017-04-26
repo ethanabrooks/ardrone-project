@@ -59,7 +59,7 @@ tmux send-keys -t a3c:ps\
 
 for i in $(seq 0 $(($num_workers - 1))); do
   tmux send-keys -t a3c:w-$i\
- "docker run -it --rm --name=w-$i --net=host\
+ "docker run -it --rm --name=w-$i\
  ardrone /start.sh false \
 '--log-dir $logdir\
  --env-id gazebo\
