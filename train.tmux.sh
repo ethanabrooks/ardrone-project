@@ -31,11 +31,13 @@ done
 spec=$(tr -d "\n \"'" < spec.json) # remove whitespace and quotes
 num_workers=$(cat $spec_path | jq "{worker}[]|length")
 
+#source catkin/devel/setup.bash
+#roscd a3c
 mkdir -p $logdir
 kill $( lsof -i:12345 -t ) > /dev/null 2>&1 && true
 kill $( lsof -i:12222-12223 -t ) > /dev/null 2>&1 && true 
 for i in $(seq 0 $(($num_workers - 1))); do
-  docker kill w-$i
+  docker kill w-$i && true
 done
 
 echo Creating tmux session and windows...
@@ -49,20 +51,30 @@ done
 sleep 1
 
 echo Executing commands in TMUX
-tmux send-keys -t a3c:ps \
-  "CUDA_VISIBLE_DEVICES= /usr/bin/python worker.py "\
-  "--log-dir $logdir --env-id gazebo --num-workers $NUM_WORKERS --job-name ps"\
-  Enter
+tmux send-keys -t a3c:ps\
+ 'CUDA_VISIBLE_DEVICES= /usr/bin/python worker.py\
+ --log-dir ardrone --env-id gazebo --num-workers 1 --job-name ps'\
+ Enter
+
 for i in $(seq 0 $(($num_workers - 1))); do
-  worker_args="--logdir $logdir\
-               --env-id gazebo\
-               --num-workers $num_workers\
-               --task $i\
-               --remote 1\
-               --spec '$spec'"
-  tmux send-keys -t a3c:w-$i \
-  "docker run -it --rm --name=w-0 --net=host ardrone /start.sh     false \"$worker_args\"" Enter
-  #                                       start script  gui
+  worker_args="\
+ --logdir $logdir\
+ --env-id gazebo\
+ --num-workers $num_workers\
+ --task $i\
+ --remote 1\
+ --spec '$spec'\
+"
+
+  tmux send-keys -t a3c:w-$i\
+ "docker run -it --rm --name=w-$i --net=host ardrone /start.sh false\
+ '--log-dir ardrone --env-id gazebo --num-workers 1 --task $i --remote 1'" Enter
+  #tmux send-keys -t a3c:w-$i\
+ #"docker run -it --rm --name=w-$i --net=host ardrone /start.sh false\
+ #'--log-dir ardrone --env-id gazebo --num-workers 1 --task $i --remote 1'" Enter
+  #tmux send-keys -t a3c:w-$i \
+  #"docker run -it --rm --name=w-$i --net=host ardrone /start.sh     false \"$worker_args\"" Enter
+                                         #start script  gui
 done
 tmux send-keys -t a3c:tb 'tensorboard --logdir ardrone --port 12345' Enter
 tmux send-keys -t a3c:htop 'htop' Enter

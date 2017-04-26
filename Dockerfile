@@ -97,4 +97,4 @@ RUN apt-get install -y \
 COPY catkin/src/a3c catkin/src/a3c
 RUN cd catkin && . /opt/ros/kinetic/setup.bash && catkin_make
 COPY start.sh /
-COPY catkin/src/a3c/spec.yaml /
+COPY catkin/src/a3c/xvfb-launch.sh /
