@@ -73,8 +73,6 @@ ENV DISPLAY :1.0
 
 EXPOSE 22
 
-#RUN echo "f () { CUDA_VISIBLE_DEVICES= /usr/bin/python worker.py --log-dir cartpole --env-id CartPole-v0 --num-workers 4 --job-name worker; }" >> /root/.bashrc
-
 RUN echo 'f () { roslaunch a3c train.launch gui:=false \
      num_workers:=$num_workers i:=$i remotes:=$remotes ; }' >> /root/.bashrc
 
@@ -89,21 +87,14 @@ RUN cd catkin/src && . /opt/ros/kinetic/setup.bash && catkin_init_workspace
 COPY catkin/src/tum_simulator/ catkin/src/tum_simulator
 RUN . /opt/ros/kinetic/setup.bash && cd catkin && catkin_make
 
+RUN apt-get install -y \
+      telnet \
+      nmap \
+      iputils-ping \
+      net-tools
+
 # A3C
 COPY catkin/src/a3c catkin/src/a3c
 RUN cd catkin && . /opt/ros/kinetic/setup.bash && catkin_make
-COPY catkin/src/a3c/xvfb-launch.sh /
-
-#WORKDIR /catkin/src/a3c
-
-# agent
-#RUN pip install -e catkin/src/agent
-#RUN echo "f () { roslaunch a3c train.launch }" >> /root/.bashrc
-
-
-# See http://answers.gazebosim.org/question/8065/unable-to-create-depthcamerasensor-when-launching-in-remote-computer/
-#RUN echo "Xvfb -shmem -screen 0 1280x1024x24 &" >> /root/.bashrc
-#RUN echo 'roslaunch a3c train.launch gui:=false \
-     #num_workers:=$num_workers i:=$i remotes:=$remotes' >> /root/.bashrc
-#CMD ["/bin/bash"]
-
+COPY start.sh /
+COPY catkin/src/a3c/spec.yaml /
