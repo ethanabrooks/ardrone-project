@@ -4,7 +4,6 @@ set -e
 logdir=ardrone
 spec_path=spec.json
 session=a3c
-docker build ~/ardrone-project/ -t ardrone
 
 while [[ $# -gt 1 ]]; do
   key="$1"
@@ -31,9 +30,11 @@ done
 spec=$(tr -d "\n \"'" < spec.json) # remove whitespace and quotes
 num_workers=$(cat $spec_path | jq "{worker}[]|length")
 
-#source catkin/devel/setup.bash
-#roscd a3c
+source catkin/devel/setup.bash
+roscd a3c
+rm -rf $logdir
 mkdir -p $logdir
+docker build ~/ardrone-project/ -t ardrone
 kill $( lsof -i:12345 -t ) > /dev/null 2>&1 && true
 kill $( lsof -i:12222-12223 -t ) > /dev/null 2>&1 && true 
 for i in $(seq 0 $(($num_workers - 1))); do
@@ -65,13 +66,10 @@ for i in $(seq 0 $(($num_workers - 1))); do
  --remote 1\
  --spec '$spec'\
 "
-
+ 
   tmux send-keys -t a3c:w-$i\
  "docker run -it --rm --name=w-$i --net=host ardrone /start.sh false\
- '--log-dir ardrone --env-id gazebo --num-workers 1 --task $i --remote 1'" Enter
-  #tmux send-keys -t a3c:w-$i\
- #"docker run -it --rm --name=w-$i --net=host ardrone /start.sh false\
- #'--log-dir ardrone --env-id gazebo --num-workers 1 --task $i --remote 1'" Enter
+ '--log-dir $logdir --env-id gazebo --num-workers 1 --task $i --remote 1 --spec \"$spec\"'" Enter
   #tmux send-keys -t a3c:w-$i \
   #"docker run -it --rm --name=w-$i --net=host ardrone /start.sh     false \"$worker_args\"" Enter
                                          #start script  gui
