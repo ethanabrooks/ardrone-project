@@ -4,7 +4,6 @@ set -e
 logdir=ardrone
 spec_path=spec.json
 session=a3c
-docker build ~/ardrone-project/ -t ardrone
 
 while [[ $# -gt 1 ]]; do
   key="$1"
@@ -33,7 +32,10 @@ num_workers=$(cat $spec_path | jq "{worker}[]|length")
 
 source catkin/devel/setup.bash
 roscd a3c
-mkdir -p $logdir
+rm -rf $logdir && true
+#mkdir -p $logdir
+docker build ~/ardrone-project/ -t ardrone
+
 kill $( lsof -i:12345 -t ) > /dev/null 2>&1 && true
 kill $( lsof -i:12222-12223 -t ) > /dev/null 2>&1 && true 
 for i in $(seq 0 $(($num_workers - 1))); do
@@ -52,7 +54,7 @@ sleep 1
 
 echo Executing commands in TMUX
 tmux send-keys -t a3c:ps\
- 'CUDA_VISIBLE_DEVICES= /usr/bin/python worker.py\
+ 'CUDA_VISIBLE_DEVICES= /usr/bin/python catkin/src/a3c/worker.py\
  --log-dir ardrone --env-id gazebo --num-workers 1 --job-name ps'\
  Enter
 
