@@ -33,7 +33,6 @@ num_workers=$(cat $spec_path | jq "{worker}[]|length")
 source catkin/devel/setup.bash
 roscd a3c
 rm -rf $logdir && true
-#mkdir -p $logdir
 docker build ~/ardrone-project/ -t ardrone
 
 kill $( lsof -i:12345 -t ) > /dev/null 2>&1 && true
@@ -68,10 +67,8 @@ for i in $(seq 0 $(($num_workers - 1))); do
  --remote 1\
  --spec \"$spec\"'\
 " Enter
-  #tmux send-keys -t a3c:w-$i \
-  #"docker run -it --rm --name=w-$i --net=host ardrone /start.sh     false \"$worker_args\"" Enter
-                                         #start script  gui
 done
+
 tmux send-keys -t a3c:tb 'tensorboard --logdir ardrone --port 12345' Enter
 tmux send-keys -t a3c:htop 'htop' Enter
 
