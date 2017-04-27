@@ -54,11 +54,13 @@ sleep 1
 
 echo Executing commands in TMUX
 tmux send-keys -t a3c:ps\
- "CUDA_VISIBLE_DEVICES= $(pwd)/job.py\
+ "CUDA_VISIBLE_DEVICES= /usr/bin/python $(pwd)/job.py\
  --log-dir $logdir\
  --env-id gazebo\
  --num-workers $num_workers\
  --job-name ps\
+ --workers $workers\
+ --ps $ps\
 " Enter
 
 for i in $(seq 0 $(($num_workers - 1))); do
