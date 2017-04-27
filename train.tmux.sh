@@ -27,6 +27,9 @@ while [[ $# -gt 1 ]]; do
   shift # past argument or value
 done
 
+workers=$(cat $spec_path | jq -cr "{worker}[]" | tr -d '[]"')
+ps=$(cat $spec_path | jq -cr "{ps}[]" | tr -d "[]\"'")
+
 spec=$(tr -d "\n \"'" < spec.json) # remove whitespace and quotes
 num_workers=$(cat $spec_path | jq "{worker}[]|length")
 
@@ -53,9 +56,14 @@ sleep 1
 
 echo Executing commands in TMUX
 tmux send-keys -t a3c:ps\
- 'CUDA_VISIBLE_DEVICES= /usr/bin/python $(pwd)/worker.py\
- --log-dir ardrone --env-id gazebo --num-workers 1 --job-name ps'\
- Enter
+ "CUDA_VISIBLE_DEVICES= /usr/bin/python $(pwd)/worker.py\
+ --log-dir ardrone\
+ --env-id gazebo\
+ --num-workers $num_workers\
+ --job-name ps\
+ --workers $workers\
+ --ps $ps\
+ " Enter
 
 for i in $(seq 0 $(($num_workers - 1))); do
   tmux send-keys -t a3c:w-$i\
@@ -63,10 +71,11 @@ for i in $(seq 0 $(($num_workers - 1))); do
  ardrone /start.sh false \
 '--log-dir $logdir\
  --env-id gazebo\
- --num-workers 1\
+ --num-workers $num_workers\
  --task $i\
  --remote 1\
- --spec \"$spec\"'\
+ --workers $workers\
+ --ps $ps'\
 " Enter
 done
 
