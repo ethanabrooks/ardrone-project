@@ -54,7 +54,7 @@ sleep 1
 
 echo Executing commands in TMUX
 tmux send-keys -t a3c:ps\
- "CUDA_VISIBLE_DEVICES= /usr/bin/python $(pwd)/worker.py\
+ "CUDA_VISIBLE_DEVICES= /usr/bin/python $(pwd)/job.py\
  --log-dir ardrone\
  --env-id gazebo\
  --num-workers $num_workers\
@@ -65,7 +65,7 @@ tmux send-keys -t a3c:ps\
 
 for i in $(seq 0 $(($num_workers - 1))); do
   tmux send-keys -t a3c:w-$i\
- "docker run -it --rm --name=w-$i\
+ "docker run -it --rm --name=w-$i --net=host\
  ardrone /start.sh false \
 '--log-dir $logdir\
  --env-id gazebo\
