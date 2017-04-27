@@ -27,7 +27,8 @@ while [[ $# -gt 1 ]]; do
   shift # past argument or value
 done
 
-spec=$(tr -d "\n \"'" < spec.json) # remove whitespace and quotes
+workers=$(cat $spec_path | jq -cr "{worker}[]" | tr -d '[]"')
+ps=$(cat $spec_path | jq -cr "{ps}[]" | tr -d "[]\"'")
 num_workers=$(cat $spec_path | jq "{worker}[]|length")
 
 source catkin/devel/setup.bash
@@ -54,8 +55,11 @@ sleep 1
 echo Executing commands in TMUX
 tmux send-keys -t a3c:ps\
  "CUDA_VISIBLE_DEVICES= /usr/bin/python catkin/src/a3c/worker.py\
- --log-dir $logdir --env-id gazebo --num-workers $num_workers --job-name ps"\
- Enter
+ --log-dir $logdir\
+ --env-id gazebo\
+ --num-workers $num_workers\
+ --job-name ps\
+" Enter
 
 for i in $(seq 0 $(($num_workers - 1))); do
   tmux send-keys -t a3c:w-$i\
@@ -66,8 +70,9 @@ for i in $(seq 0 $(($num_workers - 1))); do
  --num-workers $num_workers\
  --task $i\
  --remote 1\
- --spec \"$spec\"'\
-" Enter
+ --workers $workers\
+ --ps $ps\
+'" Enter
 done
 
 tmux send-keys -t a3c:tb 'tensorboard --logdir ardrone --port 12345' Enter
