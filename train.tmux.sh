@@ -29,8 +29,6 @@ done
 
 workers=$(cat $spec_path | jq -cr "{worker}[]" | tr -d '[]"')
 ps=$(cat $spec_path | jq -cr "{ps}[]" | tr -d "[]\"'")
-
-spec=$(tr -d "\n \"'" < spec.json) # remove whitespace and quotes
 num_workers=$(cat $spec_path | jq "{worker}[]|length")
 
 source catkin/devel/setup.bash
