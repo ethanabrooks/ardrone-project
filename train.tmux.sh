@@ -54,7 +54,7 @@ sleep 1
 
 echo Executing commands in TMUX
 tmux send-keys -t a3c:ps\
- "CUDA_VISIBLE_DEVICES= /usr/bin/python catkin/src/a3c/worker.py\
+ "CUDA_VISIBLE_DEVICES= $(pwd)/job.py\
  --log-dir $logdir\
  --env-id gazebo\
  --num-workers $num_workers\
