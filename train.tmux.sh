@@ -53,8 +53,8 @@ sleep 1
 
 echo Executing commands in TMUX
 tmux send-keys -t a3c:ps\
- 'CUDA_VISIBLE_DEVICES= /usr/bin/python catkin/src/a3c/worker.py\
- --log-dir ardrone --env-id gazebo --num-workers 1 --job-name ps'\
+ "CUDA_VISIBLE_DEVICES= /usr/bin/python catkin/src/a3c/worker.py\
+ --log-dir $logdir --env-id gazebo --num-workers $num_workers --job-name ps"\
  Enter
 
 for i in $(seq 0 $(($num_workers - 1))); do
@@ -63,7 +63,7 @@ for i in $(seq 0 $(($num_workers - 1))); do
  ardrone /start.sh false \
 '--log-dir $logdir\
  --env-id gazebo\
- --num-workers 1\
+ --num-workers $num_workers\
  --task $i\
  --remote 1\
  --spec \"$spec\"'\
