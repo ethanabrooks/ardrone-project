@@ -7,6 +7,6 @@ echo ------------------------------------------------------------------
 echo source /opt/ros/kinetic/setup.bash; source /catkin/devel/setup.bash; roscd a3c
 source /opt/ros/kinetic/setup.bash; source /catkin/devel/setup.bash; roscd a3c
 echo ------------------------------------------------------------------
-echo roslaunch a3c train.launch gui:=$1 worker-args:=\"$2\"
-roslaunch a3c train.launch gui:=$1 worker-args:="$2"
+echo roslaunch a3c train.launch worker-args:="$1" gui:=$2
+roslaunch a3c train.launch worker-args:="$1" gui:=$2
 echo ------------------------------------------------------------------
