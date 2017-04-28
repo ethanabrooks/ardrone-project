@@ -34,6 +34,7 @@ num_workers=$(cat $spec_path | jq "{worker}[]|length")
 source catkin/devel/setup.bash
 roscd a3c
 rm -rf $logdir && true
+mkdir $logdir
 docker build ~/ardrone-project/ -t ardrone
 
 kill $( lsof -i:12345 -t ) > /dev/null 2>&1 && true
