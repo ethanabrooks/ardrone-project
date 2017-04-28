@@ -93,7 +93,10 @@ RUN apt-get install -y \
       iputils-ping \
       net-tools
 
+COPY worker.sh /
+COPY ps.sh /
+
 # A3C
 COPY catkin/src/a3c catkin/src/a3c
 RUN cd catkin && . /opt/ros/kinetic/setup.bash && catkin_make
-COPY start.sh /
+

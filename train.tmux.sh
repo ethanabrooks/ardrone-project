@@ -4,6 +4,8 @@ set -e
 logdir=ardrone
 spec_path=spec.json
 session=a3c
+num_workers=2
+net=a3cnet
 
 while [[ $# -gt 1 ]]; do
   key="$1"
@@ -17,6 +19,10 @@ while [[ $# -gt 1 ]]; do
         spec_path="$2"
         shift # past argument
       ;;
+      -w|--num-workers)
+        num_workers="$2"
+        shift # past argument
+      ;;
       -t|--target-session)
         session="$2"
         shift # past argument
@@ -27,9 +33,13 @@ while [[ $# -gt 1 ]]; do
   shift # past argument or value
 done
 
-workers=$(cat $spec_path | jq -cr "{worker}[]" | tr -d '[]"')
-ps=$(cat $spec_path | jq -cr "{ps}[]" | tr -d "[]\"'")
-num_workers=$(cat $spec_path | jq "{worker}[]|length")
+start_ip=2
+ps=ps:1222$start_ip
+workers=$(awk -vORS=, "BEGIN {
+   for (i = 0; i < $num_workers; ++i) { 
+     print \"w-\"i\":1222\"(i + 1 + $start_ip)
+   } 
+ }" | sed 's/,$//')
 
 source catkin/devel/setup.bash
 roscd a3c
@@ -39,6 +49,7 @@ docker build ~/ardrone-project/ -t ardrone
 
 kill $( lsof -i:12345 -t ) > /dev/null 2>&1 && true
 kill $( lsof -i:12222-12223 -t ) > /dev/null 2>&1 && true 
+docker kill ps && true
 for i in $(seq 0 $(($num_workers - 1))); do
   docker kill w-$i && true
 done
@@ -53,22 +64,25 @@ for i in $(seq 0 $(($num_workers - 1))); do
 done
 sleep 1
 
+docker network create $net && true
+
 echo Executing commands in TMUX
 tmux send-keys -t a3c:ps\
- "CUDA_VISIBLE_DEVICES= /usr/bin/python $(pwd)/job.py\
+ "docker run -it --rm --name=ps --net=$net ardrone /ps.sh \
+ '\
  --log-dir $logdir\
  --env-id gazebo\
  --num-workers $num_workers\
  --job-name ps\
  --workers $workers\
  --ps $ps\
-" Enter
+'" Enter
 
 for i in $(seq 0 $(($num_workers - 1))); do
   tmux send-keys -t a3c:w-$i\
- "docker run -it --rm --name=w-$i\
- ardrone /start.sh false \
-'--log-dir $logdir\
+ "docker run -it --rm --name=w-$i --net=$net ardrone /worker.sh false \
+ '\
+ --log-dir $logdir\
  --env-id gazebo\
  --num-workers $num_workers\
  --task $i\
