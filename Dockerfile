@@ -93,8 +93,8 @@ RUN apt-get install -y \
       iputils-ping \
       net-tools
 
-COPY worker.sh /
-COPY ps.sh /
+COPY ardrone.sh /
+COPY catkin/src/a3c/job.sh /
 
 # A3C
 COPY catkin/src/a3c catkin/src/a3c

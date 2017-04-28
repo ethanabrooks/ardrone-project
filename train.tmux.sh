@@ -1,22 +1,22 @@
 #! /usr/bin/env bash
 
 set -e
-logdir=ardrone
-spec_path=spec.json
 session=a3c
 num_workers=2
 net=a3cnet
+env_id=gazebo
+logdir=$env_id
 
 while [[ $# -gt 1 ]]; do
   key="$1"
 
   case $key in
-      -l|--log-dir)
-        logdir="$2"
+      -e|--env-id)
+        env_id="$2"
         shift # past argument
       ;;
-      -s|--spec-path)
-        spec_path="$2"
+      -l|--log-dir)
+        logdir="$2"
         shift # past argument
       ;;
       -w|--num-workers)
@@ -41,11 +41,22 @@ workers=$(awk -vORS=, "BEGIN {
    } 
  }" | sed 's/,$//')
 
+if [[ "$env_id" = gazebo ]]; then
+  image=ardrone
+  start_script=ardrone.sh
+  docker build . -t $image
+else
+  image=ardrone
+  start_script=job.sh
+  roscd a3c
+  docker build . -t $image
+fi
+
 source catkin/devel/setup.bash
 roscd a3c
 rm -rf $logdir && true
 mkdir $logdir
-docker build ~/ardrone-project/ -t ardrone
+
 
 kill $( lsof -i:12345 -t ) > /dev/null 2>&1 && true
 kill $( lsof -i:12222-12223 -t ) > /dev/null 2>&1 && true 
@@ -68,10 +79,10 @@ docker network create $net && true
 
 echo Executing commands in TMUX
 tmux send-keys -t a3c:ps\
- "docker run -it --rm --name=ps --net=$net ardrone /ps.sh \
+ "docker run -it --rm --name=ps --net=$net $image /job.sh \
  '\
  --log-dir $logdir\
- --env-id gazebo\
+ --env-id $env_id\
  --num-workers $num_workers\
  --job-name ps\
  --workers $workers\
@@ -80,10 +91,10 @@ tmux send-keys -t a3c:ps\
 
 for i in $(seq 0 $(($num_workers - 1))); do
   tmux send-keys -t a3c:w-$i\
- "docker run -it --rm --name=w-$i --net=$net ardrone /worker.sh false \
+ "docker run -it --rm --name=w-$i --net=$net $image /$start_script false \
  '\
  --log-dir $logdir\
- --env-id gazebo\
+ --env-id $env_id\
  --num-workers $num_workers\
  --task $i\
  --remote 1\
@@ -92,7 +103,7 @@ for i in $(seq 0 $(($num_workers - 1))); do
 '" Enter
 done
 
-tmux send-keys -t a3c:tb 'tensorboard --logdir ardrone --port 12345' Enter
+tmux send-keys -t a3c:tb 'tensorboard --logdir $image --port 12345' Enter
 tmux send-keys -t a3c:htop 'htop' Enter
 
 echo 'Use `tmux attach -t a3c` to watch process output
