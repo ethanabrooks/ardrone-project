@@ -75,6 +75,7 @@ docker run --rm -it -v $(dirname $logdir):/del $image\
   rm -rf del/$(basename $logdir) && true
 docker run --rm -it -v $(dirname $logdir):/mk $image\
   mkdir mk/$(basename $logdir) && true
+exit
 mkdir -p $logdir && true
 docker build . -t $image
 
