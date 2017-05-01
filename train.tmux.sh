@@ -73,7 +73,9 @@ fi
 #source catkin/devel/setup.bash
 docker run --rm -it -v $(dirname $logdir):/del $image\
   rm -rf del/$(basename $logdir) && true
-mkdir -p $logdir
+docker run --rm -it -v $(dirname $logdir):/mk $image\
+  mkdir mk/$(basename $logdir) && true
+mkdir -p $logdir && true
 docker build . -t $image
 
 echo Executing commands in TMUX
