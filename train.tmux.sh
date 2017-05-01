@@ -73,7 +73,6 @@ fi
 #source catkin/devel/setup.bash
 docker run --rm -it -v $(dirname $logdir):/del $image\
   rm -rf del/$(basename $logdir) && true
-exit
 mkdir -p $logdir
 docker build . -t $image
 
