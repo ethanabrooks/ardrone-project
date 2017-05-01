@@ -94,7 +94,7 @@ RUN apt-get install -y \
       net-tools
 
 COPY ardrone.sh /
-COPY catkin/src/a3c/job.sh /
+COPY job.sh /
 
 # A3C
 COPY catkin/src/a3c catkin/src/a3c

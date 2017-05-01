@@ -33,6 +33,7 @@ while [[ $# -gt 1 ]]; do
 done
 
 logdir=$(pwd)/logs/$env_id
+docker_log=/logs
 start_ip=2
 ps=ps:1222$start_ip
 workers=$(awk -vORS=, "BEGIN {
@@ -40,6 +41,7 @@ workers=$(awk -vORS=, "BEGIN {
      print \"w-\"i\":1222\"(i + 1 + $start_ip)
    } 
  }" | sed 's/,$//')
+workers=${workers},172.17.0.1:12222
 
 kill $( lsof -i:12345 -t ) > /dev/null 2>&1 && true
 kill $( lsof -i:12222-12223 -t ) > /dev/null 2>&1 && true 
@@ -58,27 +60,28 @@ for i in $(seq 0 $(($num_workers - 1))); do
 done
 sleep 1
 
-source catkin/devel/setup.bash
-rm -rf $logdir && true
-mkdir -p $logdir
-
 docker network create $net && true
 
 if [[ "$env_id" = gazebo ]]; then
   image=ardrone
   start_script=ardrone.sh
-  docker build . -t $image
 else
   image=ardrone
   start_script=job.sh
-  docker build . -t $image
 fi
+
+#source catkin/devel/setup.bash
+docker run --rm -it -v $(dirname $logdir):/del $image\
+  rm -rf del/$(basename $logdir) && true
+exit
+mkdir -p $logdir
+docker build . -t $image
 
 echo Executing commands in TMUX
 tmux send-keys -t a3c:ps\
  "docker run -it --rm --name=ps --net=$net $image /job.sh \
  '\
- --log-dir /logs\
+ --log-dir $docker_log\
  --env-id $env_id\
  --num-workers $num_workers\
  --job-name ps\
@@ -89,12 +92,12 @@ tmux send-keys -t a3c:ps\
 for i in $(seq 0 $(($num_workers - 1))); do
   tmux send-keys -t a3c:w-$i\
  "docker run -it\
- --volume=$logdir:/logs\
+ --volume=$logdir:$docker_log\
  --rm\
  --name=w-$i\
  --net=$net $image\
- /$start_script \
- '--log-dir /logs\
+ /$start_script\
+ '--log-dir $docker_log\
  --env-id $env_id\
  --num-workers $num_workers\
  --task $i\
