@@ -22,23 +22,10 @@ optional arguments:
   -h, --help            show this help message and exit
   -w NUM_WORKERS, --num-workers NUM_WORKERS
                         Number of workers
-  -r REMOTES, --remotes REMOTES
-                        The address of pre-existing VNC servers and rewarders
-                        to use (e.g. -r vnc://localhost:5900+15900,vnc://local
-                        host:5901+15901).
   -e ENV_ID, --env-id ENV_ID
                         Environment id
   -l LOG_DIR, --log-dir LOG_DIR
                         Log directory path
-  -s SPEC_PATH, --spec-path SPEC_PATH
-                        Path to file with spec (argument to
-                        tf.train.ClusterSpec)
-  -n, --dry-run         Print out commands rather than executing them
-  -m MODE, --mode MODE  tmux: run workers in a tmux session. nohup: run
-                        workers with nohup. child: run workers as child
-                        processes
-  --visualise           Visualise the gym environment by running env.render()
-                        between each timestep
 "
         exit
 
