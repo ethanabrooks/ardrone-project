@@ -6,10 +6,43 @@ num_workers=2
 net=a3cnet
 env_id=gazebo
 
-while [[ $# -gt 1 ]]; do
+while [[ $# -gt 0 ]]; do
   key="$1"
 
   case $key in
+      -h|--help)
+        echo \
+"
+usage: train.py [-h] [-w NUM_WORKERS] [-r REMOTES] [-e ENV_ID] [-l LOG_DIR]
+                [-s SPEC_PATH] [-n] [-m MODE] [--visualise]
+
+Run commands
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -w NUM_WORKERS, --num-workers NUM_WORKERS
+                        Number of workers
+  -r REMOTES, --remotes REMOTES
+                        The address of pre-existing VNC servers and rewarders
+                        to use (e.g. -r vnc://localhost:5900+15900,vnc://local
+                        host:5901+15901).
+  -e ENV_ID, --env-id ENV_ID
+                        Environment id
+  -l LOG_DIR, --log-dir LOG_DIR
+                        Log directory path
+  -s SPEC_PATH, --spec-path SPEC_PATH
+                        Path to file with spec (argument to
+                        tf.train.ClusterSpec)
+  -n, --dry-run         Print out commands rather than executing them
+  -m MODE, --mode MODE  tmux: run workers in a tmux session. nohup: run
+                        workers with nohup. child: run workers as child
+                        processes
+  --visualise           Visualise the gym environment by running env.render()
+                        between each timestep
+"
+        exit
+
+      ;;
       -e|--env-id)
         env_id="$2"
         shift # past argument
