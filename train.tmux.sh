@@ -5,6 +5,8 @@ session=a3c
 num_workers=4
 net=a3cnet
 env_id=CartPole-v0
+learning_rate=0.00001
+policy=MLPpolicy
 
 while [[ $# -gt 0 ]]; do
   key="$1"
@@ -26,6 +28,10 @@ optional arguments:
                         Environment id
   -l LOG_DIR, --log-dir LOG_DIR
                         Log directory path
+  -r LEARN_RATE, --learning-rate LEARN_RATE
+                        Learning rate
+  -p POLICY_NAME, --policy POLICY_NAME
+                        MLPpolicy|LSTMpolicy
 "
         exit
 
@@ -40,6 +46,14 @@ optional arguments:
       ;;
       -w|--num-workers)
         num_workers="$2"
+        shift # past argument
+      ;;
+      -r|--learning-rate)
+        learning_rate="$2"
+        shift # past argument
+      ;;
+      -p|--policy)
+        policy="$2"
         shift # past argument
       ;;
       -t|--target-session)
@@ -114,6 +128,8 @@ session:     $session
 num-workers: $num_workers
 net:         $net
 env-id:      $env_id
+learn-rate:  $learning_rate
+policy:      $policy
 
 "
 
@@ -142,6 +158,8 @@ for i in $(seq 0 $(($num_workers - 1))); do
  --num-workers $num_workers\
  --task $i\
  --remote 1\
+ --policy $policy\
+ --learning-rate $learning_rate
  --workers $workers\
  --ps $ps\
 ' false" Enter
