@@ -2,9 +2,9 @@
 
 set -e
 session=a3c
-num_workers=2
+num_workers=4
 net=a3cnet
-env_id=gazebo
+env_id=CartPole-v0
 
 while [[ $# -gt 0 ]]; do
   key="$1"
@@ -96,6 +96,16 @@ docker run --rm -it -v $(dirname $logdir):/del $image\
 docker run --rm -it -v $(dirname $logdir):/mk $image\
   mkdir mk/$(basename $logdir) && true
 docker build . -t $image
+
+echo "
+
+Arguments:
+session:     $session
+num-workers: $num_workers
+net:         $net
+env-id:      $env_id
+
+"
 
 echo Executing commands in TMUX
 tmux send-keys -t a3c:ps\
