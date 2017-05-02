@@ -49,7 +49,13 @@ COPY go-vncdriver go-vncdriver
 RUN apt-get install -y python-dev make golang libjpeg-turbo8-dev
 RUN pip install go-vncdriver
 
-RUN pip --no-cache-dir install tensorflow 'gym[atari]==0.7.4' opencv-python universe scipy
+RUN pip --no-cache-dir install\
+      tensorflow\
+      'gym[atari]==0.7.4'\
+      opencv-python\
+      universe\
+      scipy\
+      mujoco-py
 
 # Install SSH server
 RUN apt-get update && apt-get install -y openssh-server
