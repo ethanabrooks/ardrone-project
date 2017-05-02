@@ -72,11 +72,16 @@ done
 
 echo Creating tmux session and windows...
 tmux kill-session -t $session && true
+echo killing
 tmux new-session -s $session -n ps -d bash
+echo ps
 tmux new-window -t $session -n tb bash
+echo tb
 tmux new-window -t $session -n htop bash
+echo htop
 for i in $(seq 0 $(($num_workers - 1))); do
   tmux new-window -t $session -n w-$i bash
+  echo w-$i
 done
 sleep 1
 
