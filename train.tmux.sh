@@ -69,20 +69,25 @@ docker kill ps && true
 for i in $(seq 0 $(($num_workers - 1))); do
   docker kill w-$i && true
 done
-sleep 0.5
 
 echo Creating tmux session and windows...
 tmux kill-session -t $session && true
-echo killing
+
+# sleep until session dies
+while [[ ! -z "$(tmux list-session -F '#{session_name}' | grep $session)" ]]; do
+  sleep 0.0001 
+done
+
+echo Killed session
 tmux new-session -s $session -n ps -d bash
-echo ps
+echo Created ps
 tmux new-window -t $session -n tb bash
-echo tb
+echo Created tb
 tmux new-window -t $session -n htop bash
-echo htop
+echo Created htop
 for i in $(seq 0 $(($num_workers - 1))); do
   tmux new-window -t $session -n w-$i bash
-  echo w-$i
+  echo Created w-$i
 done
 
 docker network create $net && true
