@@ -29,7 +29,7 @@ optional arguments:
   -l LOG_DIR, --log-dir LOG_DIR
                         Log directory path
   -r LEARN_RATE, --learning-rate LEARN_RATE
-                        Learning rate
+                        Learning rate (scientific notation is acceptable)
   -p POLICY_NAME, --policy POLICY_NAME
                         MLPpolicy|LSTMpolicy
 "
@@ -141,6 +141,8 @@ tmux send-keys -t a3c:ps\
  --env-id $env_id\
  --num-workers $num_workers\
  --job-name ps\
+ --policy $policy\
+ --learning-rate $learning_rate
  --workers $workers\
  --ps $ps\
 '" Enter
