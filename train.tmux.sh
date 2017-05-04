@@ -109,6 +109,29 @@ for i in $(seq 0 $(($num_workers - 1))); do
   echo Created w-$i
 done
 
+job_args="\
+ --log-dir $docker_log\
+ --env-id $env_id\
+ --num-workers $num_workers\
+ --policy $policy\
+ --learning-rate $learning_rate
+ --workers $workers\
+ --ps $ps\
+"
+if $visualise; then
+  if [[ "$env_id" != gazebo ]]; then
+    echo '
+    Visualization is only configured for the gazebo environment. For all other\
+    environments, use
+
+    $ python train.py --visualise
+    '
+    exit
+  fi
+  job_args="${job_args} --visualise"
+fi
+
+
 if [[ -z "$(docker network ls | grep $net)" ]]; then
   echo "Creating docker '$net' network"
   docker network create $net
@@ -129,31 +152,6 @@ docker run --rm -it -v $(dirname $logdir):/mk $image\
   mkdir mk/$(basename $logdir) && true
 docker build . -t $image
 
-echo "
-
-Arguments:
-session:     $session
-num-workers: $num_workers
-net:         $net
-env-id:      $env_id
-learn-rate:  $learning_rate
-policy:      $policy
-
-"
-
-job_args="\
- --log-dir $docker_log\
- --env-id $env_id\
- --num-workers $num_workers\
- --policy $policy\
- --learning-rate $learning_rate
- --workers $workers\
- --ps $ps\
-"
-if $visualise; then
-  job_args="${job_args} --visualise"
-fi
-
 echo Executing commands in TMUX
 tmux send-keys -t a3c:ps\
  "docker run -it --rm --name=ps --net=$net $image\
@@ -170,6 +168,18 @@ done
 tmux send-keys -t a3c:tb "tensorboard --logdir $logdir --port 12345" Enter
 tmux send-keys -t a3c:htop 'htop' Enter
 
-echo 'Use `tmux attach -t a3c` to watch process output
+echo "
+
+Arguments:
+session:     $session
+num-workers: $num_workers
+net:         $net
+env-id:      $env_id
+learn-rate:  $learning_rate
+policy:      $policy
+
+"'
+Use `tmux attach -t a3c` to watch process output
 Use `tmux kill-session -t a3c` to kill the job
-Point your browser to http://localhost:12345 to see Tensorboard'
+Point your browser to http://localhost:12345 to see Tensorboard
+'
