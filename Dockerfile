@@ -93,11 +93,14 @@ RUN cd catkin/src && . /opt/ros/kinetic/setup.bash && catkin_init_workspace
 COPY catkin/src/tum_simulator/ catkin/src/tum_simulator
 RUN . /opt/ros/kinetic/setup.bash && cd catkin && catkin_make
 
+RUN apt-get update
 RUN apt-get install -y \
       telnet \
       nmap \
       iputils-ping \
-      net-tools
+      ros-kinetic-hector* \
+      net-tools \
+      netcat
 
 COPY ardrone.sh /
 COPY job.sh /

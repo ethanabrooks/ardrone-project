@@ -7,6 +7,7 @@ net=a3cnet
 env_id=CartPole-v0
 learning_rate=0.00001
 policy=MLPpolicy
+visualise=false
 
 while [[ $# -gt 0 ]]; do
   key="$1"
@@ -32,9 +33,13 @@ optional arguments:
                         Learning rate (scientific notation is acceptable)
   -p POLICY_NAME, --policy POLICY_NAME
                         MLPpolicy|LSTMpolicy
+  --visualise           Render environment as agent interacts with it (doesn't
+                        slow down gazebo, but drastically slows gym environments)
 "
         exit
-
+      ;;
+      --visualise)
+        visualise=true
       ;;
       -e|--env-id)
         env_id="$2"
@@ -145,6 +150,9 @@ job_args="\
  --workers $workers\
  --ps $ps\
 "
+if $visualise; then
+  job_args="${job_args} --visualise"
+fi
 
 echo Executing commands in TMUX
 tmux send-keys -t a3c:ps\
