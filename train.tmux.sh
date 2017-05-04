@@ -133,14 +133,24 @@ policy:      $policy
 
 "
 
+job_args="\
+ --log-dir $docker_log\
+ --env-id $env_id\
+ --num-workers $num_workers\
+ --policy $policy\
+ --learning-rate $learning_rate
+ --workers $workers\
+ --ps $ps\
+"
+
 echo Executing commands in TMUX
 tmux send-keys -t a3c:ps\
  "docker run -it --rm --name=ps --net=$net $image /job.sh \
  '\
+ --job-name ps\
  --log-dir $docker_log\
  --env-id $env_id\
  --num-workers $num_workers\
- --job-name ps\
  --policy $policy\
  --learning-rate $learning_rate
  --workers $workers\
@@ -155,11 +165,13 @@ for i in $(seq 0 $(($num_workers - 1))); do
  --name=w-$i\
  --net=$net $image\
  /$start_script\
- '--log-dir $docker_log\
- --env-id $env_id\
- --num-workers $num_workers\
+ '\
+ --job-name worker\
  --task $i\
  --remote 1\
+ --log-dir $docker_log\
+ --env-id $env_id\
+ --num-workers $num_workers\
  --policy $policy\
  --learning-rate $learning_rate
  --workers $workers\
