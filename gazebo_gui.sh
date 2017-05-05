@@ -8,9 +8,7 @@ export GAZEBO_MASTER_IP=$(docker inspect --format \
   '{{ .NetworkSettings.Networks.a3cnet.IPAddress }}' w-0)
 export GAZEBO_MASTER_URI=$GAZEBO_MASTER_IP:11345
 echo '
-
 You can close the Gazebo GUI at any time with affecting training. 
 Use `bash ardrone_project/gazebo_gui.sh` to reopen the GUI.
-
 '
 gzclient --verbose

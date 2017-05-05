@@ -155,7 +155,6 @@ tmux send-keys -t a3c:tb "tensorboard --logdir $logdir --port 12345" Enter
 tmux send-keys -t a3c:htop 'htop' Enter
 
 echo "
-
 Arguments:
 session:     $session
 num-workers: $num_workers
@@ -163,7 +162,6 @@ net:         $net
 env-id:      $env_id
 learn-rate:  $learning_rate
 policy:      $policy
-
 "'
 Use `tmux attach -t a3c` to watch process output
 Use `bash kill.sh` to kill the job
