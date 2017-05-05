@@ -84,12 +84,14 @@ workers=${workers},172.17.0.1:12222
 
 kill $( lsof -i:12345 -t ) > /dev/null 2>&1 && true
 kill $( lsof -i:12222-12223 -t ) > /dev/null 2>&1 && true 
+
+echo Killing any docker instances names 'ps' or 'w-[i]'
 docker kill ps && true
 for i in $(seq 0 $(($num_workers - 1))); do
   docker kill w-$i && true
 done
 
-echo Creating tmux session and windows...
+echo Killing previous $session session
 tmux kill-session -t $session && true
 
 # sleep until session dies
@@ -97,40 +99,12 @@ while [[ ! -z "$(tmux list-session -F '#{session_name}' | grep $session)" ]]; do
   sleep 0.0001 
 done
 
-echo Killed session
 tmux new-session -s $session -n ps -d bash
-echo Created ps
 tmux new-window -t $session -n tb bash
-echo Created tb
 tmux new-window -t $session -n htop bash
-echo Created htop
 for i in $(seq 0 $(($num_workers - 1))); do
   tmux new-window -t $session -n w-$i bash
-  echo Created w-$i
 done
-
-job_args="\
- --log-dir $docker_log\
- --env-id $env_id\
- --num-workers $num_workers\
- --policy $policy\
- --learning-rate $learning_rate
- --workers $workers\
- --ps $ps\
-"
-if $visualise; then
-  if [[ "$env_id" != gazebo ]]; then
-    echo '
-    Visualization is only configured for the gazebo environment. For all other\
-    environments, use
-
-    $ python train.py --visualise
-    '
-    exit
-  fi
-  job_args="${job_args} --visualise"
-fi
-
 
 if [[ -z "$(docker network ls | grep $net)" ]]; then
   echo "Creating docker '$net' network"
@@ -141,16 +115,36 @@ if [[ "$env_id" = gazebo ]]; then
   image=ardrone
   start_script=ardrone.sh
 else
+  if $visualise; then
+    echo '
+    Visualization is only configured for the gazebo environment. For all other
+    environments, use
+
+    $ python train.py --visualise
+    '
+    exit
+  fi
+
   image=ardrone
   start_script=job.sh
 fi
 
-#source catkin/devel/setup.bash
+echo Deleting $logdir
 docker run --rm -it -v $(dirname $logdir):/del $image\
   rm -rf del/$(basename $logdir) && true
 docker run --rm -it -v $(dirname $logdir):/mk $image\
   mkdir mk/$(basename $logdir) && true
 docker build . -t $image
+
+job_args="\
+ --log-dir $docker_log\
+ --env-id $env_id\
+ --num-workers $num_workers\
+ --policy $policy\
+ --learning-rate $learning_rate
+ --workers $workers\
+ --ps $ps\
+"
 
 echo Executing commands in TMUX
 tmux send-keys -t a3c:ps\
@@ -183,3 +177,8 @@ Use `tmux attach -t a3c` to watch process output
 Use `tmux kill-session -t a3c` to kill the job
 Point your browser to http://localhost:12345 to see Tensorboard
 '
+
+if $visualise; then
+  bash gazebo_gui.sh
+fi
+
