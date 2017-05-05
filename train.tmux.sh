@@ -82,6 +82,7 @@ workers=$(awk -vORS=, "BEGIN {
  }" | sed 's/,$//')
 workers=${workers},172.17.0.1:12222
 
+# kill processes using ports
 kill $( lsof -i:12345 -t ) > /dev/null 2>&1 && true
 kill $( lsof -i:12222-12223 -t ) > /dev/null 2>&1 && true 
 
@@ -94,11 +95,12 @@ done
 echo Killing previous $session session
 tmux kill-session -t $session && true
 
-# sleep until session dies
+echo Sleeping until session dies...
 while [[ ! -z "$(tmux list-session -F '#{session_name}' | grep $session)" ]]; do
   sleep 0.0001 
 done
 
+# create new session and windows
 tmux new-session -s $session -n ps -d bash
 tmux new-window -t $session -n tb bash
 tmux new-window -t $session -n htop bash
@@ -134,8 +136,10 @@ docker run --rm -it -v $(dirname $logdir):/del $image\
   rm -rf del/$(basename $logdir) && true
 docker run --rm -it -v $(dirname $logdir):/mk $image\
   mkdir mk/$(basename $logdir) && true
+
 docker build . -t $image
 
+# args common to ps and workers
 job_args="\
  --log-dir $docker_log\
  --env-id $env_id\
@@ -146,19 +150,17 @@ job_args="\
  --ps $ps\
 "
 
-echo Executing commands in TMUX
+# execute commands in TMUX
 tmux send-keys -t a3c:ps\
  "docker run -it --rm --name=ps --net=$net $image\
  /job.sh '--job-name ps $job_args'"\
  Enter
-
 for i in $(seq 0 $(($num_workers - 1))); do
  tmux send-keys -t a3c:w-$i\
  "docker run -it --volume=$logdir:$docker_log --rm --name=w-$i --net=$net $image\
  /$start_script '--job-name worker --task $i --remote 1 $job_args' false"\
  Enter
 done
-
 tmux send-keys -t a3c:tb "tensorboard --logdir $logdir --port 12345" Enter
 tmux send-keys -t a3c:htop 'htop' Enter
 
@@ -181,4 +183,3 @@ Point your browser to http://localhost:12345 to see Tensorboard
 if $visualise; then
   bash gazebo_gui.sh
 fi
-
