@@ -8,6 +8,7 @@ env_id=CartPole-v0
 learning_rate=0.00001
 policy=MLPpolicy
 visualise=false
+delete_logdir=true
 
 while [[ $# -gt 0 ]]; do
   key="$1"
@@ -40,6 +41,9 @@ optional arguments:
       ;;
       --visualise)
         visualise=true
+      ;;
+      -d|--delete-logdir)
+        delete_logdir=true
       ;;
       -e|--env-id)
         env_id="$2"
@@ -82,23 +86,7 @@ workers=$(awk -vORS=, "BEGIN {
  }" | sed 's/,$//')
 workers=${workers},172.17.0.1:12222
 
-# kill processes using ports
-kill $( lsof -i:12345 -t ) > /dev/null 2>&1 && true
-kill $( lsof -i:12222-12223 -t ) > /dev/null 2>&1 && true 
-
-echo Killing any docker instances names 'ps' or 'w-[i]'
-docker kill ps && true
-for i in $(seq 0 $(($num_workers - 1))); do
-  docker kill w-$i && true
-done
-
-echo Killing previous $session session
-tmux kill-session -t $session && true
-
-echo Sleeping until session dies...
-while [[ ! -z "$(tmux list-session -F '#{session_name}' | grep $session)" ]]; do
-  sleep 0.0001 
-done
+bash kill.sh $session && true
 
 # create new session and windows
 tmux new-session -s $session -n ps -d bash
@@ -131,11 +119,13 @@ else
   start_script=job.sh
 fi
 
-echo Deleting $logdir
-docker run --rm -it -v $(dirname $logdir):/del $image\
-  rm -rf del/$(basename $logdir) && true
-docker run --rm -it -v $(dirname $logdir):/mk $image\
-  mkdir mk/$(basename $logdir) && true
+if $delete_logdir; then
+  echo Deleting $logdir
+  docker run --rm -it -v $(dirname $logdir):/del $image\
+    rm -rf del/$(basename $logdir) && true
+  docker run --rm -it -v $(dirname $logdir):/mk $image\
+    mkdir mk/$(basename $logdir) && true
+fi
 
 docker build . -t $image
 
@@ -176,7 +166,7 @@ policy:      $policy
 
 "'
 Use `tmux attach -t a3c` to watch process output
-Use `tmux kill-session -t a3c` to kill the job
+Use `bash kill.sh` to kill the job
 Point your browser to http://localhost:12345 to see Tensorboard
 '
 
