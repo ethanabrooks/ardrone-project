@@ -170,7 +170,7 @@ visualise:     $visualise
 delete logdir: $delete_logdir
 "'
 Use `tmux attach -t a3c` to watch process output
-Use `bash kill.sh '"$a3c"'` to kill the job
+Use `bash kill.sh '"$session"'` to kill the job
 Point your browser to http://localhost:12345 to see Tensorboard
 '
 
