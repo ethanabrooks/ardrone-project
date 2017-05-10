@@ -32,6 +32,9 @@ optional arguments:
                         Learning rate (scientific notation is acceptable)
   -p POLICY_NAME, --policy POLICY_NAME
                         MLPpolicy|LSTMpolicy
+  -l LOGDIR, --logdir LOGDIR
+                        Directory to save and restore model. Defaults to
+                        logs/ENV_ID
   --delete-logdir
                         Delete the directory containing previous checkpoints and
                         summaries
@@ -49,6 +52,10 @@ optional arguments:
       ;;
       -e|--env-id)
         env_id="$2"
+        shift # past argument
+      ;;
+      -l|--logdir)
+        logdir="$2"
         shift # past argument
       ;;
       -w|--num-workers)
@@ -73,7 +80,7 @@ optional arguments:
   shift # past argument or value
 done
 
-logdir=$(pwd)/logs/$env_id
+logdir=${logdir:-$(pwd)/logs/$env_id}
 docker_log=/logs
 start_ip=2
 ps=ps:1222$start_ip
