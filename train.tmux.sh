@@ -8,7 +8,7 @@ env_id=CartPole-v0
 learning_rate=0.00001
 policy=MLPpolicy
 visualise=false
-delete_logdir=true
+delete_logdir=false
 
 while [[ $# -gt 0 ]]; do
   key="$1"
@@ -34,7 +34,11 @@ optional arguments:
                         Learning rate (scientific notation is acceptable)
   -p POLICY_NAME, --policy POLICY_NAME
                         MLPpolicy|LSTMpolicy
-  --visualise           Render environment as agent interacts with it (doesn't
+  --delete-logdir
+                        Delete the directory containing previous checkpoints and
+                        summaries
+  --visualise
+                        Render environment as agent interacts with it (doesn't
                         slow down gazebo, but drastically slows gym environments)
 "
         exit
@@ -42,7 +46,7 @@ optional arguments:
       --visualise)
         visualise=true
       ;;
-      -d|--delete-logdir)
+      --delete-logdir)
         delete_logdir=true
       ;;
       -e|--env-id)
@@ -156,12 +160,14 @@ tmux send-keys -t a3c:htop 'htop' Enter
 
 echo "
 Arguments:
-session:     $session
-num-workers: $num_workers
-net:         $net
-env-id:      $env_id
-learn-rate:  $learning_rate
-policy:      $policy
+session:       $session
+num-workers:   $num_workers
+net:           $net
+env-id:        $env_id
+learn-rate:    $learning_rate
+policy:        $policy
+visualise:     $visualise
+delete logdir: $delete_logdir
 "'
 Use `tmux attach -t a3c` to watch process output
 Use `bash kill.sh` to kill the job
