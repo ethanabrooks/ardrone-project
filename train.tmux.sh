@@ -28,8 +28,6 @@ optional arguments:
                         Number of workers
   -e ENV_ID, --env-id ENV_ID
                         Environment id
-  -l LOG_DIR, --log-dir LOG_DIR
-                        Log directory path
   -r LEARN_RATE, --learning-rate LEARN_RATE
                         Learning rate (scientific notation is acceptable)
   -p POLICY_NAME, --policy POLICY_NAME
@@ -51,10 +49,6 @@ optional arguments:
       ;;
       -e|--env-id)
         env_id="$2"
-        shift # past argument
-      ;;
-      -l|--log-dir)
-        logdir="$2"
         shift # past argument
       ;;
       -w|--num-workers)
@@ -105,7 +99,7 @@ if [[ -z "$(docker network ls | grep $net)" ]]; then
   docker network create $net
 fi
 
-if [[ "$env_id" = gazebo ]]; then
+if [[ "$env_id" = *gazebo* ]]; then
   image=ardrone
   start_script=ardrone.sh
 else
