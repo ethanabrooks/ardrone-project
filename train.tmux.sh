@@ -91,7 +91,7 @@ workers=$(awk -vORS=, "BEGIN {
  }" | sed 's/,$//')
 workers=${workers},172.17.0.1:12222
 
-bash kill.sh $session && true
+./kill.sh $session
 
 # create new session and windows
 tmux new-session -s $session -n ps -d bash

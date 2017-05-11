@@ -18,5 +18,5 @@ fi
 
 if [[ ! -z $(tmux list-session | grep $1) ]]; then
   echo Killing previous $1 session
-  tmux kill-session -t $1 && true
+  tmux kill-session -t $1
 fi
