@@ -34,7 +34,7 @@ optional arguments:
                         MLPpolicy|LSTMpolicy
   -l LOGDIR, --logdir LOGDIR
                         Directory to save and restore model. Defaults to
-                        logs/ENV_ID
+                        logs/ENV_ID. Must be absolute.
   --delete-logdir
                         Delete the directory containing previous checkpoints and
                         summaries
@@ -168,6 +168,7 @@ env-id:        $env_id
 learn-rate:    $learning_rate
 policy:        $policy
 visualise:     $visualise
+logdir:        $logdir
 delete logdir: $delete_logdir
 "'
 Use `tmux attach -t a3c` to watch process output
