@@ -90,8 +90,7 @@ workers=$(awk -vORS=, "BEGIN {
      print \"w-\"i\":1222\"(i + 1 + $start_ip)
    } 
  }" | sed 's/,$//')
-workers=${workers},172.17.0.1:12222  # TODO: get rid of this last address and
-                                     # double check that gazebo_gui still works
+workers=${workers}
 
 bash $script_dir/kill.sh $session
 
