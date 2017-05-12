@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
 set -e
-script_dir=$(dirname $(readlink -f $0))
+root_dir=$(dirname $(readlink -f $0))
 session=a3c
 num_workers=4
 net=a3cnet
@@ -81,7 +81,7 @@ optional arguments:
   shift # past argument or value
 done
 
-logdir=${logdir:-$(pwd)/logs/$env_id}
+logdir=${logdir:-$root_dir/logs/$env_id}
 docker_log=/logs
 start_ip=2
 ps=ps:1222$start_ip
@@ -92,7 +92,7 @@ workers=$(awk -vORS=, "BEGIN {
  }" | sed 's/,$//')
 workers=${workers}
 
-bash $script_dir/kill.sh $session
+bash $root_dir/kill.sh $session
 
 # create new session and windows
 tmux new-session -s $session -n ps -d bash
@@ -133,7 +133,7 @@ if $delete_logdir; then
     mkdir mk/$(basename $logdir) && true
 fi
 
-docker build $script_dir -t $image
+docker build $root_dir -t $image
 
 # args common to ps and workers
 job_args="\
@@ -178,5 +178,5 @@ Point your browser to http://localhost:12345 to see Tensorboard
 '
 
 if $visualise; then
-  bash $script_dir/gazebo_gui.sh
+  bash $root_dir/gazebo_gui.sh
 fi
