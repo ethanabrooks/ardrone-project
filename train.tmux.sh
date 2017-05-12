@@ -89,7 +89,8 @@ workers=$(awk -vORS=, "BEGIN {
      print \"w-\"i\":1222\"(i + 1 + $start_ip)
    } 
  }" | sed 's/,$//')
-workers=${workers},172.17.0.1:12222
+workers=${workers},172.17.0.1:12222  # TODO: get rid of this last address and
+                                     # double check that gazebo_gui still works
 
 ./kill.sh $session
 
@@ -106,8 +107,9 @@ if [[ -z "$(docker network ls | grep $net)" ]]; then
   docker network create $net
 fi
 
+image=ardrone  # TODO: rename this something generic
+
 if [[ "$env_id" = *gazebo* ]]; then
-  image=ardrone
   start_script=ardrone.sh
 else
   if $visualise; then
@@ -120,7 +122,6 @@ else
     exit
   fi
 
-  image=ardrone
   start_script=job.sh
 fi
 

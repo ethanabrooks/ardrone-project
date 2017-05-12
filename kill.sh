@@ -1,5 +1,6 @@
 #! /usr/bin/env bash
 
+# TODO: make a3c a default arg
 if [[ $# != 1 ]]; then
   echo 'usage: kill.sh [SESSION_NAME]'
   exit
@@ -13,7 +14,11 @@ echo Killing any docker instances names 'ps' or 'w-[i]'
 workers=$(docker ps -q --filter 'name=w-*')
 ps=$(docker ps -q --filter 'name=ps')
 if [[ ! -z "$workers" ]]; then
-  docker kill $workers $ps
+  docker kill $workers
+fi
+
+if [[ ! -z "$ps" ]]; then
+  docker kill $ps
 fi
 
 if [[ ! -z $(tmux list-session | grep $1) ]]; then
