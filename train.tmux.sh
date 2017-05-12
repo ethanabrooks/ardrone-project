@@ -1,6 +1,7 @@
 #! /usr/bin/env bash
 
 set -e
+script_dir=$(dirname $(readlink -f $0))
 session=a3c
 num_workers=4
 net=a3cnet
@@ -92,7 +93,7 @@ workers=$(awk -vORS=, "BEGIN {
 workers=${workers},172.17.0.1:12222  # TODO: get rid of this last address and
                                      # double check that gazebo_gui still works
 
-./kill.sh $session
+bash $script_dir/kill.sh $session
 
 # create new session and windows
 tmux new-session -s $session -n ps -d bash
@@ -133,7 +134,7 @@ if $delete_logdir; then
     mkdir mk/$(basename $logdir) && true
 fi
 
-docker build . -t $image
+docker build $script_dir -t $image
 
 # args common to ps and workers
 job_args="\
@@ -178,5 +179,5 @@ Point your browser to http://localhost:12345 to see Tensorboard
 '
 
 if $visualise; then
-  bash gazebo_gui.sh
+  bash $script_dir/gazebo_gui.sh
 fi
